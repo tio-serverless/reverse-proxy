@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+option go_package = "tio.control.v1";
+
+import "const.proto";
+import "common.proto";
+
+message BuildStatus {
+    string user = 1;
+    string name = 2;
+    string image = 3;
+    string api = 4;
+    int32 rate = 5;
+    string raw = 6;
+    JobStatus status = 7;
+    int32 sid = 8;
+    string stype = 9; //http/grpc/tcp
+    string version = 10;
+}
+
+message BuildReply {
+    int32 code = 1;
+    string msg = 2;
+}
+
+message TioBuildQueryRequest {
+    int32 uid = 1;
+    string name = 2;
+    int32 limit = 3;
+}
+
+message TioBuildQueryReply {
+    CommonRespCode Code = 1;
+    repeated BuildStatus builds = 2;
+}
+
+message TioPloy {
+    map<string, int32> Ploy = 1;
+}
+service ControlService {
+    rpc UpdateBuildStatus (BuildStatus) returns (BuildReply) {
+    }
+
+    rpc GetBuildStatus (TioBuildQueryRequest) returns (TioBuildQueryReply) {
+    }
+
+    rpc GetToken (TioUserRequest) returns (TioUserReply) {
+    }
+
+    rpc Login (TioUserRequest) returns (TioUserReply) {
+    }
+
+    //    GetAgentMeta 获取其它Agents元数据
+    rpc GetAgentMeta (TioAgentRequest) returns (TioAgentReply) {
+    }
+
+    rpc GetLogs (TioLogRequest) returns (stream TioLogReply) {
+    }
+
+    //    UpdateServerMetadata 更新服务运行参数
+    rpc UpdateServerMetadata (SrvMeta) returns (TioReply) {
+
+    }
+
+    rpc GetPloy (TioPloy) returns (TioPloy) {
+
+    }
+}

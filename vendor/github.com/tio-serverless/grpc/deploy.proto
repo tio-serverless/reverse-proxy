@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "tio.control.v1";
+import "const.proto";
+
+message DeployRequest {
+    string image = 1;
+    string config = 2;
+    int32 sid = 3;
+    string name = 4;
+    int32 stype = 5;
+    int32 instanceNum = 6; //实例数量
+    double instanceMultiple = 7; //实例倍数
+}
+
+service TioDeployService {
+    rpc NewDeploy (DeployRequest) returns (TioReply) {
+    }
+
+    rpc ScalaDeploy (DeployRequest) returns (TioReply) {
+    }
+
+    rpc DeployInfo (DeployRequest) returns (TioReply) {
+    }
+}
