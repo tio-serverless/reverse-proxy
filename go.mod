@@ -11,5 +11,6 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.4.0
 	github.com/tio-serverless/grpc v0.0.0-20200103071801-bc1d06d17b68
+	golang.org/x/net v0.0.0-20190620200207-3b0461eec859 // indirect
 	google.golang.org/grpc v1.26.0
 )

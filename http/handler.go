@@ -16,6 +16,7 @@ import (
 //	return nil
 //}
 
+// Proxy 反向代理服务入口
 func Proxy(s dataLoader, w http.ResponseWriter, r *http.Request) {
 
 	if !s.IsValidInject(r.URL.Path) {

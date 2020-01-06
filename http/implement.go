@@ -147,7 +147,7 @@ func (s *svcImplement) Scala(name string) error {
 	}
 
 	if r.Code != tio_control_v1.CommonRespCode_RespSucc {
-		return fmt.Errorf("Monitor Scala Error %s.", r.Msg)
+		return fmt.Errorf("Monitor Scala Error %s. ", r.Msg)
 	}
 
 	return nil
