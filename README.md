@@ -2,6 +2,7 @@
 
 > 当服务实例为0时，负责缓冲外部请求，当实例被创建之后，再继续转发此请求
 
+[![Build Status](https://travis-ci.com/tio-serverless/reverse-proxy.svg?branch=master)](https://travis-ci.com/tio-serverless/reverse-proxy)
 
 ### Http Proxy
 
@@ -13,11 +14,11 @@
 + Environment
 
   - REDIS
-  
+
     - TIO_PROXY_REDIS_ADDR
     - TIO_PROXY_REDIS_PASSWD
     - TIO_PROXY_REDIS_DB
-    
+
   - MONITOR
-  
+
     - TIO_MONITOR_ADDR
