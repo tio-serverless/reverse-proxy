@@ -25,6 +25,12 @@ func main() {
 func setupRoute(loader dataLoader) {
 	router := mux.NewRouter()
 	router.HandleFunc("/{url}", func(w http.ResponseWriter, r *http.Request) {
+		logrus.Debugf("New URL Request %s", r.URL.String())
+		Proxy(loader, w, r)
+	})
+
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		logrus.Debugf("New Root Request %s", r.URL.String())
 		Proxy(loader, w, r)
 	})
 
