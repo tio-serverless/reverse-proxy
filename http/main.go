@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -12,6 +12,8 @@ import (
 var si *svcImplement
 
 func main() {
+	setupLog()
+
 	var err error
 	si, err = newSI()
 	if err != nil {
@@ -20,6 +22,19 @@ func main() {
 
 	go start(si, 8000)
 	setupRoute(si)
+}
+
+func setupLog() {
+	switch strings.ToLower("TIO_PROXY_LOG") {
+	case "info":
+		logrus.SetLevel(logrus.InfoLevel)
+	case "warn":
+		logrus.SetLevel(logrus.WarnLevel)
+	case "error":
+		logrus.SetLevel(logrus.ErrorLevel)
+	default:
+		logrus.SetLevel(logrus.DebugLevel)
+	}
 }
 
 func setupRoute(loader dataLoader) {
@@ -41,5 +56,6 @@ func setupRoute(loader dataLoader) {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	logrus.Debug("Server Start ---")
+	logrus.Println(srv.ListenAndServe())
 }
