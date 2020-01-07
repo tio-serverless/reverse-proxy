@@ -14,12 +14,12 @@ var si *svcImplement
 func main() {
 	setupLog()
 
-	var err error
-	si, err = newSI()
+	si, err := newSI()
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
+	logrus.Info("Service Init Finish! ")
 	go start(si, 8000)
 	setupRoute(si, si.routeChan)
 }
