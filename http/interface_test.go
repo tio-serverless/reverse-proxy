@@ -40,7 +40,7 @@ func TestProxy(t *testing.T) {
 		Proto: "http",
 	}
 
-	hi.EXPECT().Transfer("127.0.0.1:80", &w, r)
+	hi.EXPECT().Transfer("http://127.0.0.1:80", &w, r)
 
 	Proxy(hi, &w, r)
 
