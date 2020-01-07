@@ -74,6 +74,7 @@ func newSI() (*svcImplement, error) {
 		return nil, err
 	}
 
+	si.output()
 	return si, nil
 }
 
