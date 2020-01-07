@@ -33,6 +33,8 @@ func Proxy(s dataLoader, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logrus.Debugf("Wait %s Create Finish", service)
+
 	srv, err := s.Wait(service)
 	if err != nil {
 		logrus.Errorf("Wait %s Error. %s", service, err.Error())
@@ -40,6 +42,7 @@ func Proxy(s dataLoader, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logrus.Debugf("%s New Endpoint %s", srv.Name, srv.Endpoint)
 	s.Transfer(srv.Endpoint, w, r)
 }
 
