@@ -2,9 +2,7 @@ package main
 
 import (
 	"os"
-	"reflect"
 	"testing"
-	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/stretchr/testify/assert"
@@ -62,56 +60,56 @@ func Test_svcImplement_GetServiceName(t *testing.T) {
 	}
 }
 
-func Test_svcImplement_Wait(t *testing.T) {
-	type fields struct {
-		srvChan chan service
-	}
-	type args struct {
-		name string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    service
-		wantErr bool
-	}{
-		{
-			name:   "withSucData",
-			fields: fields{srvChan: make(chan service)},
-			args: args{
-				name: "svc1",
-			},
-			want: service{
-				Name:     "svc1",
-				Endpoint: "127.0.0.1:80",
-			},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &svcImplement{
-				// srvChan: tt.fields.srvChan,
-			}
-			go func(name string) {
-				time.Sleep(3 * time.Second)
-				s.Done(service{
-					Name:     name,
-					Endpoint: "127.0.0.1:80",
-				})
-			}(tt.args.name)
-			got, err := s.Wait(tt.args.name)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Wait() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Wait() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+// func Test_svcImplement_Wait(t *testing.T) {
+// 	type fields struct {
+// 		srvChan chan service
+// 	}
+// 	type args struct {
+// 		name string
+// 	}
+// 	tests := []struct {
+// 		name    string
+// 		fields  fields
+// 		args    args
+// 		want    service
+// 		wantErr bool
+// 	}{
+// 		{
+// 			name:   "withSucData",
+// 			fields: fields{srvChan: make(chan service)},
+// 			args: args{
+// 				name: "svc1",
+// 			},
+// 			want: service{
+// 				Name:     "svc1",
+// 				Endpoint: "127.0.0.1:80",
+// 			},
+// 			wantErr: false,
+// 		},
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			s := &svcImplement{
+// 				// srvChan: tt.fields.srvChan,
+// 			}
+// 			go func(name string) {
+// 				time.Sleep(3 * time.Second)
+// 				s.Done(service{
+// 					Name:     name,
+// 					Endpoint: "127.0.0.1:80",
+// 				})
+// 			}(tt.args.name)
+// 			got, err := s.Wait(tt.args.name)
+// 			if (err != nil) != tt.wantErr {
+// 				t.Errorf("Wait() error = %v, wantErr %v", err, tt.wantErr)
+// 				return
+// 			}
+// 			if !reflect.DeepEqual(got, tt.want) {
+// 				t.Errorf("Wait() got = %v, want %v", got, tt.want)
+// 			}
+// 		})
+// 	}
+// }
 
 func Test_svcImplement_output(t *testing.T) {
 
