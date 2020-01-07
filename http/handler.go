@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -43,6 +44,7 @@ func Proxy(s dataLoader, w http.ResponseWriter, r *http.Request) {
 	// }
 
 	logrus.Debugf("%s New Endpoint %s", service, endpoint)
+	endpoint = fmt.Sprintf("http://%s", endpoint)
 	s.Transfer(endpoint, w, r)
 }
 
