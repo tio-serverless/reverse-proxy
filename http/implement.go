@@ -141,7 +141,7 @@ func (s *svcImplement) Scala(name string) error {
 
 	c := tio_control_v1.NewMonitorServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
 	r, err := c.Scala(ctx, &tio_control_v1.MonitorScalaRequest{
