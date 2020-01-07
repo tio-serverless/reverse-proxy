@@ -17,8 +17,10 @@ import (
 type svcImplement struct {
 	ri *redis.Client
 	//inject key=uri, value=service name
-	inject  map[string]string
-	srvChan chan service
+	inject map[string]string
+	// srvChan map[string]chan service
+	// routeChan 每次收到新的路由数据后，通过此chan通知router注册Http Path
+	routeChan chan string
 }
 
 func (s *svcImplement) InjectSync(context.Context, *tio_control_v1.ProxyEndpointRequest) (*tio_control_v1.TioReply, error) {
@@ -62,7 +64,9 @@ func newSI() (*svcImplement, error) {
 	if err != nil {
 		return nil, err
 	}
-	si.srvChan = make(chan service, 100)
+	// si.srvChan = make(map[string]chan service)
+	si.routeChan = make(chan string, 100)
+
 	si.inject = make(map[string]string)
 
 	err = si.LoadInjectData()
@@ -70,7 +74,16 @@ func newSI() (*svcImplement, error) {
 		return nil, err
 	}
 
+	si.output()
 	return si, nil
+}
+
+func (s *svcImplement) output() {
+	logrus.Info("HTTP Proxy:")
+	logrus.Infof("  TIO_PROXY_REDIS_ADDR: %s", os.Getenv("TIO_PROXY_REDIS_ADDR"))
+	logrus.Infof("  TIO_PROXY_REDIS_PASSWD: %s***", os.Getenv("TIO_PROXY_REDIS_PASSWD")[:2])
+	logrus.Infof("  TIO_PROXY_REDIS_DB: %s", os.Getenv("TIO_PROXY_REDIS_DB"))
+	logrus.Infof("  TIO_MONITOR_ADDR: %s", os.Getenv("TIO_MONITOR_ADDR"))
 }
 
 func (s *svcImplement) redis() error {
@@ -94,12 +107,6 @@ func (s *svcImplement) redis() error {
 }
 
 func (s *svcImplement) LoadInjectData() error {
-	//if s.ri == nil {
-	//	if err := s.redis(); err != nil {
-	//		logrus.Fatalf("Connect Redis Error. %s", err.Error())
-	//	}
-	//}
-
 	iter := s.ri.Scan(0, "", 0).Iterator()
 	for iter.Next() {
 		service := iter.Val()
@@ -113,6 +120,7 @@ func (s *svcImplement) LoadInjectData() error {
 		}
 
 		for _, u := range uri {
+			s.routeChan <- u
 			s.inject[u] = service
 		}
 	}
@@ -124,9 +132,8 @@ func (s *svcImplement) LoadInjectData() error {
 	return nil
 }
 
-func (s *svcImplement) Scala(name string) error {
+func (s *svcImplement) Scala(name string) (string, error) {
 	conn, err := grpc.Dial(os.Getenv("TIO_MONITOR_ADDR"), grpc.WithInsecure())
-	//conn, err := grpc.Dial("172.31.0.87:80", grpc.WithInsecure())
 	if err != nil {
 		panic(fmt.Sprintf("did not connect: %v", err))
 	}
@@ -134,32 +141,31 @@ func (s *svcImplement) Scala(name string) error {
 
 	c := tio_control_v1.NewMonitorServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
 	r, err := c.Scala(ctx, &tio_control_v1.MonitorScalaRequest{
 		Name: name,
 		Num:  2,
 	})
-
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if r.Code != tio_control_v1.CommonRespCode_RespSucc {
-		return fmt.Errorf("Monitor Scala Error %s. ", r.Msg)
+		return "", fmt.Errorf("Monitor Scala Error %s. ", r.Msg)
 	}
 
-	return nil
+	logrus.Debugf("%s Has New Endpoint %s", name, r.Msg)
+
+	return r.Msg, nil
 }
 
 func (s *svcImplement) Wait(name string) (service, error) {
-	srv := <-s.srvChan
-
-	return srv, nil
+	return service{}, nil
 }
 
 func (s *svcImplement) Done(srv service) error {
-	s.srvChan <- srv
+	// s.srvChan <- srv
 	return nil
 }

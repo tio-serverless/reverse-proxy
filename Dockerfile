@@ -1,3 +1,3 @@
 FROM golang:stretch
-COPY bin/tio-inject-http /tio-inject-http
-ENTRYPOINT ["/tio-inject-http"]
+COPY bin/tio-proxy-http /tio-proxy-http
+ENTRYPOINT ["/tio-proxy-http"]

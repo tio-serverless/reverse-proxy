@@ -30,7 +30,5 @@ before_install:
 install:
   - go test ./...
   - go build -mod=vendor -ldflags "-X main._VERSION_=$TIO_VERSION -X main._BRANCH_=$TRAVIS_BRANCH" -o bin/tio-proxy-http http/*.go
-
-after_script:
   - docker build -t ${TIO_PROXY_AGENT}:http-${TIO_VERSION}-${TRAVIS_BRANCH} -f Dockerfile .
   - docker push ${TIO_PROXY_AGENT}:http-${TIO_VERSION}-${TRAVIS_BRANCH}

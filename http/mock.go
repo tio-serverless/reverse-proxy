@@ -48,11 +48,12 @@ func (mr *MockdataLoaderMockRecorder) LoadInjectData() *gomock.Call {
 }
 
 // Scala mocks base method
-func (m *MockdataLoader) Scala(arg0 string) error {
+func (m *MockdataLoader) Scala(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Scala", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Scala indicates an expected call of Scala

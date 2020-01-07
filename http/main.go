@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -12,19 +12,52 @@ import (
 var si *svcImplement
 
 func main() {
-	var err error
-	si, err = newSI()
+	setupLog()
+
+	si, err := newSI()
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
+	logrus.Info("Service Init Finish! ")
 	go start(si, 8000)
-	setupRoute(si)
+	setupRoute(si, si.routeChan)
 }
 
-func setupRoute(loader dataLoader) {
+func setupLog() {
+	switch strings.ToLower("TIO_PROXY_LOG") {
+	case "info":
+		logrus.SetLevel(logrus.InfoLevel)
+	case "warn":
+		logrus.SetLevel(logrus.WarnLevel)
+	case "error":
+		logrus.SetLevel(logrus.ErrorLevel)
+	default:
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+}
+
+func setupRoute(loader dataLoader, r chan string) {
 	router := mux.NewRouter()
-	router.HandleFunc("/{url}", func(w http.ResponseWriter, r *http.Request) {
+	go func(router *mux.Router, r chan string) {
+		for {
+			select {
+			case u := <-r:
+				logrus.Infof("Register New Path %s", u)
+				router.HandleFunc(u, func(w http.ResponseWriter, r *http.Request) {
+					logrus.Debugf("New Root Request %s", r.URL.String())
+					Proxy(loader, w, r)
+				})
+			}
+		}
+	}(router, r)
+	// router.HandleFunc("/{url}", func(w http.ResponseWriter, r *http.Request) {
+	// 	logrus.Debugf("New URL Request %s", r.URL.String())
+	// 	Proxy(loader, w, r)
+	// })
+
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		logrus.Debugf("New Root Request %s", r.URL.String())
 		Proxy(loader, w, r)
 	})
 
@@ -35,5 +68,6 @@ func setupRoute(loader dataLoader) {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	logrus.Debug("Server Start ---")
+	logrus.Println(srv.ListenAndServe())
 }

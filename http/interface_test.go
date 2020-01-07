@@ -19,11 +19,11 @@ func TestProxy(t *testing.T) {
 	u := "/v1/api"
 	hi.EXPECT().IsValidInject(u).Return(true)
 	hi.EXPECT().GetServiceName(u).Return("svc1")
-	hi.EXPECT().Scala("svc1").Return(nil)
-	hi.EXPECT().Wait("svc1").Return(service{
-		Name:     "svc1",
-		Endpoint: "127.0.0.1:80",
-	}, nil)
+	hi.EXPECT().Scala("svc1").Return("127.0.0.1:80", nil)
+	// hi.EXPECT().Wait("svc1").Return(service{
+	// 	Name:     "svc1",
+	// 	Endpoint: "127.0.0.1:80",
+	// }, nil)
 
 	w := httptest.ResponseRecorder{
 		Code:      200,
@@ -40,7 +40,7 @@ func TestProxy(t *testing.T) {
 		Proto: "http",
 	}
 
-	hi.EXPECT().Transfer("127.0.0.1:80", &w, r)
+	hi.EXPECT().Transfer("http://127.0.0.1:80", &w, r)
 
 	Proxy(hi, &w, r)
 
