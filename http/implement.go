@@ -77,6 +77,14 @@ func newSI() (*svcImplement, error) {
 	return si, nil
 }
 
+func (s *svcImplement) output() {
+	logrus.Info("HTTP Proxy:")
+	logrus.Infof("  TIO_PROXY_REDIS_ADDR: %s", os.Getenv("TIO_PROXY_REDIS_ADDR"))
+	logrus.Infof("  TIO_PROXY_REDIS_PASSWD: %s***", os.Getenv("TIO_PROXY_REDIS_PASSWD")[:2])
+	logrus.Infof("  TIO_PROXY_REDIS_DB: %s", os.Getenv("TIO_PROXY_REDIS_DB"))
+	logrus.Infof("  TIO_MONITOR_ADDR: %s", os.Getenv("TIO_MONITOR_ADDR"))
+}
+
 func (s *svcImplement) redis() error {
 	db, _ := strconv.Atoi(os.Getenv("TIO_PROXY_REDIS_DB"))
 	add := os.Getenv("TIO_PROXY_REDIS_ADDR")

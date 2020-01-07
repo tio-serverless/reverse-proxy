@@ -1,10 +1,12 @@
 package main
 
 import (
+	"os"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/go-redis/redis"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,13 +39,13 @@ func Test_svcImplement_GetServiceName(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name:   "siample",
-			fields: fields{inject: map[string]string{"/v1/api": "svc1",}},
+			fields: fields{inject: map[string]string{"/v1/api": "svc1"}},
 			args:   args{uri: "/v1/api"},
 			want:   "svc1",
 		},
 		{
 			name:   "noData",
-			fields: fields{inject: map[string]string{"/v1/api": "svc1",}},
+			fields: fields{inject: map[string]string{"/v1/api": "svc1"}},
 			args:   args{uri: "/v2/api"},
 			want:   "",
 		},
@@ -107,6 +109,41 @@ func Test_svcImplement_Wait(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Wait() got = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func Test_svcImplement_output(t *testing.T) {
+
+	os.Setenv("TIO_PROXY_REDIS_ADDR", "10.0.0.1:6379")
+	os.Setenv("TIO_PROXY_REDIS_PASSWD", "123456")
+	os.Setenv("TIO_PROXY_REDIS_DB", "0")
+	os.Setenv("TIO_MONITOR_ADDR", "10.0.0.2:80")
+
+	type fields struct {
+		ri        *redis.Client
+		inject    map[string]string
+		srvChan   chan service
+		routeChan chan string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+	}{
+		{
+			name:   "normal",
+			fields: fields{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &svcImplement{
+				ri:        tt.fields.ri,
+				inject:    tt.fields.inject,
+				srvChan:   tt.fields.srvChan,
+				routeChan: tt.fields.routeChan,
+			}
+			s.output()
 		})
 	}
 }
