@@ -26,7 +26,7 @@ func Proxy(s dataLoader, w http.ResponseWriter, r *http.Request) {
 
 	service := s.GetServiceName(r.URL.Path)
 
-	err := s.Scala(service)
+	endpoint, err := s.Scala(service)
 	if err != nil {
 		logrus.Errorf("Scala %s Error. %s", service, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -35,15 +35,15 @@ func Proxy(s dataLoader, w http.ResponseWriter, r *http.Request) {
 
 	logrus.Debugf("Wait %s Create Finish", service)
 
-	srv, err := s.Wait(service)
-	if err != nil {
-		logrus.Errorf("Wait %s Error. %s", service, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	// srv, err := s.Wait(service)
+	// if err != nil {
+	// 	logrus.Errorf("Wait %s Error. %s", service, err.Error())
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
 
-	logrus.Debugf("%s New Endpoint %s", srv.Name, srv.Endpoint)
-	s.Transfer(srv.Endpoint, w, r)
+	logrus.Debugf("%s New Endpoint %s", service, endpoint)
+	s.Transfer(endpoint, w, r)
 }
 
 //func (s *svcImplement) Proxy(w http.ResponseWriter, r *http.Request) {

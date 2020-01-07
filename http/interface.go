@@ -6,7 +6,7 @@ type dataLoader interface {
 	//loadInjectData 加载Inject数据,并完成初始化
 	LoadInjectData() error
 	//scala 通知monitor service 进行扩容
-	Scala(string) error
+	Scala(string) (string, error)
 	//wait 等待指定的服务实例创建完成
 	Wait(string) (service, error)
 	//done 指定的服务创建成功

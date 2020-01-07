@@ -92,7 +92,7 @@ func Test_svcImplement_Wait(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &svcImplement{
-				srvChan: tt.fields.srvChan,
+				// srvChan: tt.fields.srvChan,
 			}
 			go func(name string) {
 				time.Sleep(3 * time.Second)
@@ -138,9 +138,9 @@ func Test_svcImplement_output(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &svcImplement{
-				ri:        tt.fields.ri,
-				inject:    tt.fields.inject,
-				srvChan:   tt.fields.srvChan,
+				ri:     tt.fields.ri,
+				inject: tt.fields.inject,
+				// srvChan:   tt.fields.srvChan,
 				routeChan: tt.fields.routeChan,
 			}
 			s.output()

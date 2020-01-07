@@ -17,8 +17,8 @@ import (
 type svcImplement struct {
 	ri *redis.Client
 	//inject key=uri, value=service name
-	inject  map[string]string
-	srvChan chan service
+	inject map[string]string
+	// srvChan map[string]chan service
 	// routeChan 每次收到新的路由数据后，通过此chan通知router注册Http Path
 	routeChan chan string
 }
@@ -64,7 +64,7 @@ func newSI() (*svcImplement, error) {
 	if err != nil {
 		return nil, err
 	}
-	si.srvChan = make(chan service, 100)
+	// si.srvChan = make(map[string]chan service)
 	si.routeChan = make(chan string, 100)
 
 	si.inject = make(map[string]string)
@@ -132,7 +132,7 @@ func (s *svcImplement) LoadInjectData() error {
 	return nil
 }
 
-func (s *svcImplement) Scala(name string) error {
+func (s *svcImplement) Scala(name string) (string, error) {
 	conn, err := grpc.Dial(os.Getenv("TIO_MONITOR_ADDR"), grpc.WithInsecure())
 	if err != nil {
 		panic(fmt.Sprintf("did not connect: %v", err))
@@ -148,25 +148,24 @@ func (s *svcImplement) Scala(name string) error {
 		Name: name,
 		Num:  2,
 	})
-
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if r.Code != tio_control_v1.CommonRespCode_RespSucc {
-		return fmt.Errorf("Monitor Scala Error %s. ", r.Msg)
+		return "", fmt.Errorf("Monitor Scala Error %s. ", r.Msg)
 	}
 
-	return nil
+	logrus.Debugf("%s Has New Endpoint %s", name, r.Msg)
+
+	return r.Msg, nil
 }
 
 func (s *svcImplement) Wait(name string) (service, error) {
-	srv := <-s.srvChan
-
-	return srv, nil
+	return service{}, nil
 }
 
 func (s *svcImplement) Done(srv service) error {
-	s.srvChan <- srv
+	// s.srvChan <- srv
 	return nil
 }
