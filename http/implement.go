@@ -19,6 +19,8 @@ type svcImplement struct {
 	//inject key=uri, value=service name
 	inject  map[string]string
 	srvChan chan service
+	// routeChan 每次收到新的路由数据后，通过此chan通知router注册Http Path
+	routeChan chan string
 }
 
 func (s *svcImplement) InjectSync(context.Context, *tio_control_v1.ProxyEndpointRequest) (*tio_control_v1.TioReply, error) {
@@ -63,6 +65,8 @@ func newSI() (*svcImplement, error) {
 		return nil, err
 	}
 	si.srvChan = make(chan service, 100)
+	si.routeChan = make(chan string, 100)
+
 	si.inject = make(map[string]string)
 
 	err = si.LoadInjectData()
@@ -94,12 +98,6 @@ func (s *svcImplement) redis() error {
 }
 
 func (s *svcImplement) LoadInjectData() error {
-	//if s.ri == nil {
-	//	if err := s.redis(); err != nil {
-	//		logrus.Fatalf("Connect Redis Error. %s", err.Error())
-	//	}
-	//}
-
 	iter := s.ri.Scan(0, "", 0).Iterator()
 	for iter.Next() {
 		service := iter.Val()
@@ -113,6 +111,7 @@ func (s *svcImplement) LoadInjectData() error {
 		}
 
 		for _, u := range uri {
+			s.routeChan <- u
 			s.inject[u] = service
 		}
 	}
@@ -126,7 +125,6 @@ func (s *svcImplement) LoadInjectData() error {
 
 func (s *svcImplement) Scala(name string) error {
 	conn, err := grpc.Dial(os.Getenv("TIO_MONITOR_ADDR"), grpc.WithInsecure())
-	//conn, err := grpc.Dial("172.31.0.87:80", grpc.WithInsecure())
 	if err != nil {
 		panic(fmt.Sprintf("did not connect: %v", err))
 	}

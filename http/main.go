@@ -21,7 +21,7 @@ func main() {
 	}
 
 	go start(si, 8000)
-	setupRoute(si)
+	setupRoute(si, si.routeChan)
 }
 
 func setupLog() {
@@ -37,12 +37,24 @@ func setupLog() {
 	}
 }
 
-func setupRoute(loader dataLoader) {
+func setupRoute(loader dataLoader, r chan string) {
 	router := mux.NewRouter()
-	router.HandleFunc("/{url}", func(w http.ResponseWriter, r *http.Request) {
-		logrus.Debugf("New URL Request %s", r.URL.String())
-		Proxy(loader, w, r)
-	})
+	go func(router *mux.Router, r chan string) {
+		for {
+			select {
+			case u := <-r:
+				logrus.Infof("Register New Path %s", u)
+				router.HandleFunc(u, func(w http.ResponseWriter, r *http.Request) {
+					logrus.Debugf("New Root Request %s", r.URL.String())
+					Proxy(loader, w, r)
+				})
+			}
+		}
+	}(router, r)
+	// router.HandleFunc("/{url}", func(w http.ResponseWriter, r *http.Request) {
+	// 	logrus.Debugf("New URL Request %s", r.URL.String())
+	// 	Proxy(loader, w, r)
+	// })
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		logrus.Debugf("New Root Request %s", r.URL.String())
